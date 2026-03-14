@@ -1,0 +1,12 @@
+Oi, tudo bem? Hoje eu quero testar a naturalidade desta voz em português do Brasil.
+Eu gravei este áudio para verificar clareza, ritmo, dicção e estabilidade.
+Se der certo, amanhã a gente compara este resultado com o modelo anterior.
+Agora são sete horas e quarenta e cinco minutos da noite.
+O Pedro comprou vinte e três livros por duzentos e cinquenta reais.
+Será que esta voz consegue soar natural em uma pergunta um pouco mais longa?
+Incrível! Essa resposta saiu muito melhor do que eu esperava.
+No centro de São Paulo, a chuva começou de repente no fim da tarde.
+Eu preciso de uma amostra estável, limpa e fácil de comparar entre checkpoints.
+Antes de promover o modelo final, vamos ouvir tudo com bastante atenção.
+O suporte pediu CPF, CNPJ, CEP e número do pedido antes de continuar.
+Na quarta-feira, a Júlia viajou de Belo Horizonte para Porto Alegre.
