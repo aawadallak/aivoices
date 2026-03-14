@@ -133,6 +133,7 @@ Relevant entrypoints:
 - `scripts/preprocess/extract_audio.py`: low-level bulk audio extraction
 - `scripts/storage/`: Google Drive sync helpers for raw media
 - `scripts/jobs/export_xtts_dataset.py`: XTTS-ready export with `metadata_train.csv`, `metadata_eval.csv`, and `wavs/`
+- `scripts/jobs/train_xtts.py`: XTTS training entrypoint using `--dataset-dir`
 
 ## Important Jobs
 
@@ -308,6 +309,17 @@ python scripts/jobs/export_xtts_dataset.py \
 
 For the repeatable XTTS export and R2 upload workflow, see [`docs/tts.md`](/home/awadallak/aivoices/docs/tts.md).
 
+## XTTS Training
+
+The repository now includes the first training-side building blocks for XTTS:
+
+- fetch portable XTTS packages from R2
+- train from `--dataset-dir`
+- generate smoke-test review samples
+- promote `best` and `last` artifacts
+
+See [`docs/training.md`](/home/awadallak/aivoices/docs/training.md).
+
 ## Additional Docs
 
 - [`docs/setup.md`](/home/awadallak/aivoices/docs/setup.md)
@@ -316,5 +328,7 @@ For the repeatable XTTS export and R2 upload workflow, see [`docs/tts.md`](/home
 - [`docs/runs.md`](/home/awadallak/aivoices/docs/runs.md)
 - [`docs/storage.md`](/home/awadallak/aivoices/docs/storage.md)
 - [`docs/tts.md`](/home/awadallak/aivoices/docs/tts.md)
+- [`docs/training.md`](/home/awadallak/aivoices/docs/training.md)
+- [`docs/runpod.md`](/home/awadallak/aivoices/docs/runpod.md)
 - [`docs/tasks/README.md`](/home/awadallak/aivoices/docs/tasks/README.md)
 - [`docs/tasks/xtts-training-pipeline-design.md`](/home/awadallak/aivoices/docs/tasks/xtts-training-pipeline-design.md)

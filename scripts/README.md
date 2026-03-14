@@ -26,6 +26,11 @@ Current scripts:
 - `scripts/jobs/batch_score_matched_clips.py`: runs clip scoring across multiple matched-clip runs
 - `scripts/jobs/export_provisional_dataset.py`: copies scored clips into a provisional dataset export
 - `scripts/jobs/export_xtts_dataset.py`: writes `metadata_train.csv`, `metadata_eval.csv`, and `wavs/` in XTTS-compatible format
+- `scripts/jobs/publish_xtts_dataset.py`: publishes one XTTS package to remote storage with `rclone`
+- `scripts/jobs/fetch_xtts_dataset.py`: fetches one XTTS package from remote storage with `rclone`
+- `scripts/jobs/train_xtts.py`: runs the repository-native XTTS training flow from `--dataset-dir`
+- `scripts/jobs/export_xtts_smoke_review.py`: generates smoke-test review samples and `candidates.json`
+- `scripts/jobs/promote_xtts_run.py`: promotes `best` and `last` artifacts and updates `current.json`
 - `scripts/jobs/enhance_candidate_clip.py`: applies lightweight enhancement or optional Demucs separation to one clip
 - `scripts/jobs/register_sources.py`: scans raw media for a namespace and updates `metadata/<namespace>/manifests/sources.csv`
 - `scripts/jobs/register_reference.py`: adds a reference entry to `references.csv`

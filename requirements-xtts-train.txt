@@ -1,0 +1,5 @@
+coqui-tts
+trainer
+soundfile
+torchaudio
+numpy

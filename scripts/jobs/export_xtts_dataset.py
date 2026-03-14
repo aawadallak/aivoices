@@ -7,6 +7,7 @@ import argparse
 import csv
 import math
 import shutil
+from datetime import datetime, timezone
 from pathlib import Path
 
 
@@ -96,6 +97,30 @@ def write_pipe_csv(path: Path, rows: list[dict[str, str]]) -> None:
         writer.writerows(rows)
 
 
+def write_dataset_info(
+    path: Path,
+    *,
+    namespace: str,
+    speaker: str,
+    dataset_name: str,
+    source_export: str,
+    train_count: int,
+    eval_count: int,
+) -> None:
+    payload = {
+        "namespace": namespace,
+        "voice": speaker,
+        "dataset_name": dataset_name,
+        "source_export": source_export,
+        "language": "pt-BR",
+        "train_count": train_count,
+        "eval_count": eval_count,
+        "total_count": train_count + eval_count,
+        "created_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+    }
+    path.write_text(__import__("json").dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
 def main() -> int:
     args = parse_args()
     source_manifest = source_manifest_path(args.namespace, args.source_export)
@@ -164,6 +189,15 @@ def main() -> int:
 
     write_pipe_csv(output_root / "metadata_train.csv", train_rows)
     write_pipe_csv(output_root / "metadata_eval.csv", eval_rows)
+    write_dataset_info(
+        output_root / "dataset-info.json",
+        namespace=args.namespace,
+        speaker=args.speaker,
+        dataset_name=args.output_name,
+        source_export=args.source_export,
+        train_count=len(train_rows),
+        eval_count=len(eval_rows),
+    )
 
     print(f"wrote XTTS export to {output_root}")
     print(f"speaker={args.speaker} train={len(train_rows)} eval={len(eval_rows)} total={len(rows)}")

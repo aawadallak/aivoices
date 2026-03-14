@@ -1,0 +1,19 @@
+FROM pytorch/pytorch:2.4.1-cuda12.1-cudnn9-runtime
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg \
+    git \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /workspace/aivoices
+
+COPY requirements-xtts-train.txt /tmp/requirements-xtts-train.txt
+RUN pip install --no-cache-dir -r /tmp/requirements-xtts-train.txt
+
+CMD ["bash"]

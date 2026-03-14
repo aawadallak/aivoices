@@ -27,6 +27,7 @@ Create the runtime layer for XTTS training on ephemeral cloud GPU VMs, using a c
 - dataset fetch from public R2 before training
 - mounting writable output directories for run artifacts
 - compatibility with the training entrypoint used by this repo
+- `Python 3.11.9` as the current operational baseline
 
 ## Notes
 

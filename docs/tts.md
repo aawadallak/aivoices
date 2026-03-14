@@ -109,26 +109,26 @@ Upload one XTTS export:
 ```bash
 rclone copy \
   datasets/square-spongebob/exports/export_xtts/bob-esponja-clean-v1 \
-  r2:pixonlive/training/datasests/bob-esponja/clean-v1 \
+  r2:aivoices/training/datasets/square-spongebob/bob-esponja/bob-esponja-clean-v1 \
   -P
 ```
 
 Upload targets currently in use:
 
-- `r2:pixonlive/training/datasests/bob-esponja/clean-v1`
-- `r2:pixonlive/training/datasests/bob-esponja/clean-usable-v1`
-- `r2:pixonlive/training/datasests/lula-molusco/clean-v1`
-- `r2:pixonlive/training/datasests/lula-molusco/clean-usable-v1`
+- `r2:aivoices/training/datasets/square-spongebob/bob-esponja/bob-esponja-clean-v1`
+- `r2:aivoices/training/datasets/square-spongebob/bob-esponja/bob-esponja-clean-usable-v1`
+- `r2:aivoices/training/datasets/square-spongebob/lula-molusco/lula-molusco-clean-v1`
+- `r2:aivoices/training/datasets/square-spongebob/lula-molusco/lula-molusco-clean-usable-v1`
 
 ## Pull On Training Machine
 
 Examples:
 
 ```bash
-rclone copy r2:pixonlive/training/datasests/bob-esponja/clean-v1 ./bob-esponja-clean-v1 -P
-rclone copy r2:pixonlive/training/datasests/bob-esponja/clean-usable-v1 ./bob-esponja-clean-usable-v1 -P
-rclone copy r2:pixonlive/training/datasests/lula-molusco/clean-v1 ./lula-molusco-clean-v1 -P
-rclone copy r2:pixonlive/training/datasests/lula-molusco/clean-usable-v1 ./lula-molusco-clean-usable-v1 -P
+rclone copy r2:aivoices/training/datasets/square-spongebob/bob-esponja/bob-esponja-clean-v1 ./bob-esponja-clean-v1 -P
+rclone copy r2:aivoices/training/datasets/square-spongebob/bob-esponja/bob-esponja-clean-usable-v1 ./bob-esponja-clean-usable-v1 -P
+rclone copy r2:aivoices/training/datasets/square-spongebob/lula-molusco/lula-molusco-clean-v1 ./lula-molusco-clean-v1 -P
+rclone copy r2:aivoices/training/datasets/square-spongebob/lula-molusco/lula-molusco-clean-usable-v1 ./lula-molusco-clean-usable-v1 -P
 ```
 
 ## Notes

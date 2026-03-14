@@ -50,6 +50,7 @@ Current preferred execution mode:
 
 - container-first for training on ephemeral cloud VMs
 - direct host execution only as fallback for debugging or emergency cases
+- `Python 3.11.9` as the current operational baseline for first training runs
 
 ## Reference Material Already Reviewed
 
