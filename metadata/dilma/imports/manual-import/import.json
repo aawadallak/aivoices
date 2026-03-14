@@ -1,0 +1,15 @@
+{
+  "namespace": "dilma",
+  "workspace": "manual-import",
+  "source": "manual-import",
+  "voice": "dilma",
+  "language": "pt-BR",
+  "format": "xtts-package-in-output-dir",
+  "status": "imported",
+  "dataset_root": "datasets/dilma/imports/manual-import/output",
+  "train_rows": 154,
+  "eval_rows": 27,
+  "total_rows": 181,
+  "speaker_names": ["dilma"],
+  "notes": "Imported third-party Dilma dataset preserved as-is under output/. Keep this package intact and derive our own exports separately if needed."
+}

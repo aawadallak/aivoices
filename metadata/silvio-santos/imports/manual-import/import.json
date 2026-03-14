@@ -1,0 +1,15 @@
+{
+  "namespace": "silvio-santos",
+  "workspace": "manual-import",
+  "source": "manual-import",
+  "voice": "silvio-santos",
+  "language": "pt-BR",
+  "format": "xtts-package-in-output-dir",
+  "status": "imported",
+  "dataset_root": "datasets/silvio-santos/imports/manual-import/output",
+  "train_rows": 140,
+  "eval_rows": 24,
+  "total_rows": 164,
+  "speaker_names": ["silvio-santos"],
+  "notes": "Imported third-party Silvio Santos dataset normalized under output/ to use the canonical speaker_name silvio-santos. Keep this package intact and derive our own exports separately if needed."
+}

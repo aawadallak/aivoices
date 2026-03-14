@@ -1,0 +1,15 @@
+{
+  "namespace": "bolsonaro",
+  "workspace": "manual-import",
+  "source": "manual-import",
+  "voice": "bolsonaro",
+  "language": "pt-BR",
+  "format": "xtts-package-in-output-dir",
+  "status": "imported",
+  "dataset_root": "datasets/bolsonaro/imports/manual-import/output",
+  "train_rows": 135,
+  "eval_rows": 23,
+  "total_rows": 158,
+  "speaker_names": ["bolsonaro"],
+  "notes": "Imported third-party Bolsonaro dataset preserved as-is under output/. Keep this package intact and derive our own exports separately if needed."
+}

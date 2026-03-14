@@ -1,0 +1,15 @@
+{
+  "namespace": "lula",
+  "workspace": "manual-import",
+  "source": "manual-import",
+  "voice": "lula",
+  "language": "pt-BR",
+  "format": "xtts-package-in-output-dir",
+  "status": "imported",
+  "dataset_root": "datasets/lula/imports/manual-import/output",
+  "train_rows": 151,
+  "eval_rows": 21,
+  "total_rows": 172,
+  "speaker_names": ["lula"],
+  "notes": "Imported third-party Lula dataset preserved as-is under output/. Keep this package intact and derive our own exports separately if needed."
+}
