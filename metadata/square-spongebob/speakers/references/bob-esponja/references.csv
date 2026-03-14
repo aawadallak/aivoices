@@ -1,0 +1,4 @@
+reference_id,speaker,namespace,status,kind,file_path,notes
+square-spongebob-bob-esponja-ref-001,bob-esponja,square-spongebob,approved,seed,metadata/square-spongebob/speakers/references/bob-esponja/approved/square-spongebob-bob-esponja-reference-001-seed.wav,"provisional seed from square-spongebob pilot 244, diarized SPEAKER_03"
+square-spongebob-bob-esponja-ref-002,bob-esponja,square-spongebob,approved,seed,metadata/square-spongebob/speakers/references/bob-esponja/approved/square-spongebob-bob-esponja-reference-002-seed.wav,seed promoted from square-spongebob episode 245 matched clip 0008; user-confirmed as good bob-esponja audio
+square-spongebob-bob-esponja-ref-003,bob-esponja,square-spongebob,approved,seed,metadata/square-spongebob/speakers/references/bob-esponja/approved/square-spongebob-bob-esponja-reference-003-seed.wav,seed promoted from square-spongebob direct 245 bob-esponja clip 0008; user-confirmed as good bob-esponja audio

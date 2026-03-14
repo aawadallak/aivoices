@@ -1,0 +1,3 @@
+matched_speaker,episode_id,run_id,clip_index,audio_path,snr_estimate_db,music_score,speech_ratio,duration_sec,reasons
+lula-molusco,square-spongebob-episode-399,reference-match-square-spongebob-episode-399,3,metadata/square-spongebob/speakers/runs/reference-match-square-spongebob-episode-399/matched-clips/square-spongebob-episode-399/lula-molusco/lula-molusco-clip-0003.wav,19.206,0.4371,0.9902,2.821,
+lula-molusco,square-spongebob-episode-402,reference-match-square-spongebob-episode-402,7,metadata/square-spongebob/speakers/runs/reference-match-square-spongebob-episode-402/matched-clips/square-spongebob-episode-402/lula-molusco/lula-molusco-clip-0007.wav,17.405,0.4120,0.8783,3.222,

@@ -1,0 +1,33 @@
+.venv-dataset/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Raw source media should live outside git history.
+episodes/*/raw/
+episodes/*/extracted-audio/
+
+# Speaker run outputs and generated clips can also grow quickly.
+metadata/*/speakers/runs/
+
+# Bulk transcript outputs are reproducible and can get large quickly.
+metadata/*/transcripts/whisperx-*/
+metadata/*/transcripts/*-diarized/
+
+# Generated dataset artifacts and exports should stay out of git.
+datasets/*/clips/
+datasets/*/splits/
+datasets/*/exports/
+
+# Local training outputs and checkpoints.
+training/
+outputs/
+checkpoints/
+runs/
+tensorboard/
+wandb/
+lightning_logs/
+
+# Local helper inputs.
+*-g-drive-links
