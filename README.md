@@ -316,3 +316,5 @@ For the repeatable XTTS export and R2 upload workflow, see [`docs/tts.md`](/home
 - [`docs/runs.md`](/home/awadallak/aivoices/docs/runs.md)
 - [`docs/storage.md`](/home/awadallak/aivoices/docs/storage.md)
 - [`docs/tts.md`](/home/awadallak/aivoices/docs/tts.md)
+- [`docs/tasks/README.md`](/home/awadallak/aivoices/docs/tasks/README.md)
+- [`docs/tasks/xtts-training-pipeline-design.md`](/home/awadallak/aivoices/docs/tasks/xtts-training-pipeline-design.md)
