@@ -61,6 +61,12 @@ If the repository grows, split it into explicit top-level areas:
 - If a script is kept as a lower-level implementation used by a job, document that relationship clearly
 - Prefer one obvious entrypoint per responsibility
 
+## Commit Policy
+
+- Break changes into small, reviewable commits instead of batching unrelated work together
+- Always use Conventional Commits for commit messages
+- Prefer separating docs, tooling, data-manifest, and workflow changes when they can stand on their own
+
 ## Documentation For Future Runs
 
 - Record setup steps, failures, fixes, and important commands in repository docs

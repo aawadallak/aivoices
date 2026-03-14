@@ -19,6 +19,7 @@ metadata/*/transcripts/*-diarized/
 datasets/*/clips/
 datasets/*/splits/
 datasets/*/exports/
+datasets/*/imports/*/output/wavs/
 
 # Local training outputs and checkpoints.
 training/
@@ -31,3 +32,4 @@ lightning_logs/
 
 # Local helper inputs.
 *-g-drive-links
+.wrangler/
