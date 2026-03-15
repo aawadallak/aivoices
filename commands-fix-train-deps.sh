@@ -17,8 +17,9 @@ fi
 source "$VENV_DIR/bin/activate"
 
 python -m pip install --upgrade pip setuptools wheel
+python -m pip uninstall -y coqpit || true
 python -m pip install -r "$REPO_DIR/requirements-xtts-train.txt"
-python -m pip install -U coqui-tts coqui-tts-trainer
+python -m pip install -U coqui-tts coqui-tts-trainer coqpit-config
 
 python - <<'PY'
 mods = [
