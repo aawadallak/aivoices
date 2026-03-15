@@ -7,6 +7,8 @@ REPO_DIR="${REPO_DIR:-/workspace/aivoices}"
 VENV_DIR="${VENV_DIR:-$REPO_DIR/.venv-train}"
 REQUIRED_PYTHON_VERSION="${REQUIRED_PYTHON_VERSION:-3.11.9}"
 BOOTSTRAP_ONLY="${BOOTSTRAP_ONLY:-1}"
+MICROMAMBA_ROOT_PREFIX="${MICROMAMBA_ROOT_PREFIX:-/workspace/micromamba}"
+PYTHON_ENV_NAME="${PYTHON_ENV_NAME:-xtts-py3119}"
 
 DATASET_REMOTE_PREFIX="${DATASET_REMOTE_PREFIX:-}"
 DATASET_NAMESPACE="${DATASET_NAMESPACE:-}"
@@ -32,19 +34,6 @@ need_cmd() {
   }
 }
 
-check_python_version() {
-  local detected
-  detected="$(python3 - <<'PY'
-import sys
-print(f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
-PY
-)"
-  if [[ "$detected" != "$REQUIRED_PYTHON_VERSION" ]]; then
-    echo "python3 version mismatch: expected $REQUIRED_PYTHON_VERSION, got $detected" >&2
-    exit 1
-  fi
-}
-
 install_system_deps() {
   log "installing system dependencies"
   export DEBIAN_FRONTEND=noninteractive
@@ -54,7 +43,40 @@ install_system_deps() {
     git \
     curl \
     ca-certificates \
+    bzip2 \
     rclone
+}
+
+install_micromamba() {
+  if command -v micromamba >/dev/null 2>&1; then
+    return 0
+  fi
+  log "installing micromamba"
+  curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest \
+    | tar -xvj -C /tmp bin/micromamba
+  install -m 0755 /tmp/bin/micromamba /usr/local/bin/micromamba
+}
+
+ensure_python_runtime() {
+  export MAMBA_ROOT_PREFIX="$MICROMAMBA_ROOT_PREFIX"
+  local env_prefix="$MICROMAMBA_ROOT_PREFIX/envs/$PYTHON_ENV_NAME"
+  local python_bin="$env_prefix/bin/python"
+  if [[ ! -x "$python_bin" ]]; then
+    log "creating micromamba env $PYTHON_ENV_NAME with python $REQUIRED_PYTHON_VERSION"
+    micromamba create -y -n "$PYTHON_ENV_NAME" "python=$REQUIRED_PYTHON_VERSION"
+  fi
+  local detected
+  detected="$("$python_bin" - <<'PY'
+import sys
+print(f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
+PY
+)"
+  if [[ "$detected" != "$REQUIRED_PYTHON_VERSION" ]]; then
+    echo "managed python version mismatch: expected $REQUIRED_PYTHON_VERSION, got $detected" >&2
+    exit 1
+  fi
+  export TRAIN_PYTHON_BIN="$python_bin"
+  log "using managed python at $TRAIN_PYTHON_BIN"
 }
 
 sync_repo() {
@@ -72,7 +94,7 @@ sync_repo() {
 
 prepare_venv() {
   log "preparing virtualenv at $VENV_DIR"
-  python3 -m venv "$VENV_DIR"
+  "$TRAIN_PYTHON_BIN" -m venv "$VENV_DIR"
   # shellcheck disable=SC1090
   source "$VENV_DIR/bin/activate"
   python -m pip install --upgrade pip setuptools wheel
@@ -120,8 +142,9 @@ run_training() {
 
 main() {
   need_cmd python3
-  check_python_version
   install_system_deps
+  install_micromamba
+  ensure_python_runtime
   sync_repo
   prepare_venv
   fetch_dataset

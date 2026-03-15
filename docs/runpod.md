@@ -31,7 +31,7 @@ For this training flow, the current operational baseline is:
 
 This is a conservative project choice based on prior successful runs, not an official Coqui requirement for that exact patch version.
 
-The bootstrap currently checks for this version explicitly and fails fast if the VM image does not match it.
+The bootstrap now installs a managed `Python 3.11.9` runtime with `micromamba` and builds the training virtualenv from that interpreter, so the base image no longer needs to ship the exact patch version.
 
 ## Bootstrap Script
 
@@ -42,6 +42,8 @@ Use:
 It currently does:
 
 - installs missing system packages such as `rclone`
+- installs `micromamba` when needed
+- creates a managed `Python 3.11.9` runtime
 - clones or updates this repository
 - creates a virtualenv
 - installs `requirements-xtts-train.txt`
@@ -114,6 +116,8 @@ Optional:
 ```text
 RUN_EXTRA_ARGS=--save-step 500
 REQUIRED_PYTHON_VERSION=3.11.9
+MICROMAMBA_ROOT_PREFIX=/workspace/micromamba
+PYTHON_ENV_NAME=xtts-py3119
 ```
 
 ## When To Move Beyond This

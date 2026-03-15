@@ -23,6 +23,7 @@ Current operational Python baseline for the first training runs:
 - `Python 3.11.9`
 
 Treat this as a pinned project baseline until the training stack is validated more broadly.
+The Runpod bootstrap installs this version with `micromamba` and creates the training virtualenv from that managed interpreter.
 
 For long-lived VMs, prefer bootstrap-only startup:
 
