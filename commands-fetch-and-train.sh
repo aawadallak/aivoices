@@ -4,19 +4,43 @@ set -euo pipefail
 # Step 1: fetch the XTTS package and start training in nohup.
 # R2 credentials should come from the pod environment.
 
-export REPO_DIR="/workspace/aivoices"
-export DATASET_DIR="/workspace/datasets/bob-esponja-clean-v1"
-export LOG_DIR="/workspace/logs"
+require_env() {
+  local missing=0
+  for name in "$@"; do
+    if [[ -z "${!name:-}" ]]; then
+      echo "[error] missing env: $name" >&2
+      missing=1
+    fi
+  done
+  if [[ "$missing" -ne 0 ]]; then
+    exit 1
+  fi
+}
 
-export RCLONE_CONFIG_R2_TYPE='s3'
-export RCLONE_CONFIG_R2_PROVIDER='Cloudflare'
-export RCLONE_CONFIG_R2_ENDPOINT='https://318a76701b3d283740ba549a321cee13.r2.cloudflarestorage.com'
+export REPO_DIR="${REPO_DIR:-/workspace/aivoices}"
+export LOG_DIR="${LOG_DIR:-/workspace/logs}"
 
-export DATASET_REMOTE_PREFIX="r2:aivoices/training/datasets"
-export NAMESPACE="square-spongebob"
-export VOICE="bob-esponja"
-export DATASET_NAME="bob-esponja-clean-v1"
+export RCLONE_CONFIG_R2_TYPE="${RCLONE_CONFIG_R2_TYPE:-s3}"
+export RCLONE_CONFIG_R2_PROVIDER="${RCLONE_CONFIG_R2_PROVIDER:-Cloudflare}"
+export RCLONE_CONFIG_R2_ENDPOINT="${RCLONE_CONFIG_R2_ENDPOINT:-https://318a76701b3d283740ba549a321cee13.r2.cloudflarestorage.com}"
+
+export DATASET_REMOTE_PREFIX="${DATASET_REMOTE_PREFIX:-}"
+export NAMESPACE="${NAMESPACE:-}"
+export VOICE="${VOICE:-}"
+export DATASET_NAME="${DATASET_NAME:-}"
+export DATASET_DIR="${DATASET_DIR:-/workspace/datasets/${DATASET_NAME}}"
 export RUN_ID="${VOICE}-${DATASET_NAME}-$(date -u +%Y%m%d-%H%M%S)"
+
+require_env \
+  RCLONE_CONFIG_R2_TYPE \
+  RCLONE_CONFIG_R2_PROVIDER \
+  RCLONE_CONFIG_R2_ENDPOINT \
+  RCLONE_CONFIG_R2_ACCESS_KEY_ID \
+  RCLONE_CONFIG_R2_SECRET_ACCESS_KEY \
+  DATASET_REMOTE_PREFIX \
+  NAMESPACE \
+  VOICE \
+  DATASET_NAME
 
 mkdir -p "$LOG_DIR" "$(dirname "$DATASET_DIR")"
 

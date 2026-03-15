@@ -4,16 +4,42 @@ set -euo pipefail
 # Step 2: generate smoke samples and upload them for review.
 # R2 credentials should come from the pod environment.
 
-export REPO_DIR="/workspace/aivoices"
+require_env() {
+  local missing=0
+  for name in "$@"; do
+    if [[ -z "${!name:-}" ]]; then
+      echo "[error] missing env: $name" >&2
+      missing=1
+    fi
+  done
+  if [[ "$missing" -ne 0 ]]; then
+    exit 1
+  fi
+}
+
+export REPO_DIR="${REPO_DIR:-/workspace/aivoices}"
 export RUN_ID="${RUN_ID:-$(cat /workspace/last-run-id.txt)}"
 
-export RCLONE_CONFIG_R2_TYPE="s3"
-export RCLONE_CONFIG_R2_PROVIDER="Cloudflare"
-export RCLONE_CONFIG_R2_ENDPOINT="https://318a76701b3d283740ba549a321cee13.r2.cloudflarestorage.com"
+export RCLONE_CONFIG_R2_TYPE="${RCLONE_CONFIG_R2_TYPE:-s3}"
+export RCLONE_CONFIG_R2_PROVIDER="${RCLONE_CONFIG_R2_PROVIDER:-Cloudflare}"
+export RCLONE_CONFIG_R2_ENDPOINT="${RCLONE_CONFIG_R2_ENDPOINT:-https://318a76701b3d283740ba549a321cee13.r2.cloudflarestorage.com}"
 
-export RUNS_REMOTE_PREFIX="r2:aivoices/training/runs"
-export NAMESPACE="square-spongebob"
-export VOICE="bob-esponja"
+export RUNS_REMOTE_PREFIX="${RUNS_REMOTE_PREFIX:-}"
+export NAMESPACE="${NAMESPACE:-}"
+export VOICE="${VOICE:-}"
+export SPEAKER_WAV="${SPEAKER_WAV:-}"
+
+require_env \
+  RCLONE_CONFIG_R2_TYPE \
+  RCLONE_CONFIG_R2_PROVIDER \
+  RCLONE_CONFIG_R2_ENDPOINT \
+  RCLONE_CONFIG_R2_ACCESS_KEY_ID \
+  RCLONE_CONFIG_R2_SECRET_ACCESS_KEY \
+  RUNS_REMOTE_PREFIX \
+  NAMESPACE \
+  VOICE \
+  RUN_ID \
+  SPEAKER_WAV
 
 cd "$REPO_DIR"
 source "$REPO_DIR/.venv-train/bin/activate"
@@ -22,7 +48,7 @@ python3 "$REPO_DIR/scripts/jobs/export_xtts_smoke_review.py" \
   --namespace "$NAMESPACE" \
   --voice "$VOICE" \
   --run-id "$RUN_ID" \
-  --speaker-wav "$REPO_DIR/metadata/square-spongebob/speakers/references/bob-esponja/approved/square-spongebob-bob-esponja-reference-001-seed.wav" \
+  --speaker-wav "$SPEAKER_WAV" \
   --remote-prefix "$RUNS_REMOTE_PREFIX"
 
 echo
