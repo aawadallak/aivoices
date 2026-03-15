@@ -1,5 +1,5 @@
 coqui-tts
-trainer
+coqui-tts-trainer
 soundfile
 torchaudio
 numpy
