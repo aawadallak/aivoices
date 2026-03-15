@@ -1,6 +1,7 @@
 coqui-tts
 coqui-tts-trainer
 coqpit-config
+transformers==4.46.2
 soundfile
 torchaudio
 numpy
