@@ -98,8 +98,9 @@ prepare_venv() {
   # shellcheck disable=SC1090
   source "$VENV_DIR/bin/activate"
   python -m pip install --upgrade pip setuptools wheel
-  python -m pip uninstall -y coqpit >/dev/null 2>&1 || true
-  python -m pip install -r "$REPO_DIR/requirements-xtts-train.txt"
+  python -m pip uninstall -y coqpit coqpit-config coqui-tts coqui-tts-trainer trainer TTS >/dev/null 2>&1 || true
+  python -m pip install --no-cache-dir --force-reinstall coqpit-config
+  python -m pip install --no-cache-dir --force-reinstall -r "$REPO_DIR/requirements-xtts-train.txt"
 }
 
 fetch_dataset() {

@@ -17,9 +17,24 @@ fi
 source "$VENV_DIR/bin/activate"
 
 python -m pip install --upgrade pip setuptools wheel
-python -m pip uninstall -y coqpit || true
-python -m pip install -r "$REPO_DIR/requirements-xtts-train.txt"
-python -m pip install -U coqui-tts coqui-tts-trainer coqpit-config
+python -m pip uninstall -y coqpit coqpit-config coqui-tts coqui-tts-trainer trainer TTS || true
+python - <<'PY'
+import shutil
+import site
+from pathlib import Path
+
+for base in site.getsitepackages():
+    root = Path(base)
+    for pattern in ("coqpit*", "TTS*", "trainer*"):
+        for path in root.glob(pattern):
+            if path.is_dir():
+                shutil.rmtree(path, ignore_errors=True)
+            elif path.exists():
+                path.unlink(missing_ok=True)
+PY
+python -m pip install --no-cache-dir --force-reinstall coqpit-config
+python -m pip install --no-cache-dir --force-reinstall -r "$REPO_DIR/requirements-xtts-train.txt"
+python -m pip install --no-cache-dir --force-reinstall coqui-tts coqui-tts-trainer
 
 python - <<'PY'
 mods = [
@@ -37,6 +52,8 @@ for name, stmt in mods:
         print(f"[deps] {name}: FAIL -> {exc!r}")
 if failed:
     raise SystemExit(1)
+import coqpit
+print(f"[deps] coqpit module: {getattr(coqpit, '__file__', 'unknown')}")
 PY
 
 echo "Dependency refresh finished."
