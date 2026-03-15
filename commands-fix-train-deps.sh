@@ -20,4 +20,22 @@ python -m pip install --upgrade pip setuptools wheel
 python -m pip install -r "$REPO_DIR/requirements-xtts-train.txt"
 python -m pip install -U coqui-tts coqui-tts-trainer
 
+python - <<'PY'
+mods = [
+    ("torch", "import torch"),
+    ("trainer", "import trainer"),
+    ("TTS", "import TTS"),
+]
+failed = False
+for name, stmt in mods:
+    try:
+        exec(stmt, {})
+        print(f"[deps] {name}: OK")
+    except Exception as exc:
+        failed = True
+        print(f"[deps] {name}: FAIL -> {exc!r}")
+if failed:
+    raise SystemExit(1)
+PY
+
 echo "Dependency refresh finished."
