@@ -57,7 +57,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--namespace", required=True)
     parser.add_argument("--voice", required=True)
-    parser.add_argument("--speaker-wav", required=True, help="Reference WAV for XTTS conditioning.")
+    parser.add_argument("--speaker-wav", default=None, help="Reference WAV for XTTS conditioning. If omitted, uses --speaker builtin voice.")
+    parser.add_argument("--speaker", default="Gilberto Mathias", help="Built-in XTTS speaker name. Default: Gilberto Mathias (neutral mid-range male). Ignored if --speaker-wav is set.")
 
     # RVC model
     parser.add_argument("--rvc-run-id", required=True, help="RVC training run ID.")
@@ -101,37 +102,45 @@ def write_sample_manifest(path: Path, rows: list[dict[str, str]]) -> None:
 
 def generate_pretrained_xtts_samples(
     *,
-    speaker_wav: Path,
+    speaker_wav: Path | None,
+    speaker: str | None,
     smoke_lines: list[str],
     output_dir: Path,
     language: str,
     device: str,
 ) -> list[tuple[Path, str]]:
-    """Generate samples using the stock XTTS-v2 from HuggingFace (coqui/XTTS-v2)."""
+    """Generate samples using the stock XTTS-v2 from HuggingFace (coqui/XTTS-v2).
+
+    If speaker_wav is provided, uses voice cloning. Otherwise uses the built-in
+    speaker name (e.g. 'Damien Black') for a neutral base voice that RVC will convert.
+    """
     output_dir.mkdir(parents=True, exist_ok=True)
 
     import torch
-    import torchaudio
     from TTS.api import TTS
 
-    # TTS API handles model download, config, vocab, and checkpoint loading
     use_gpu = device == "cuda" and torch.cuda.is_available()
     tts = TTS(XTTS_HF_MODEL, gpu=use_gpu)
-    print(f"  [xtts] loaded pretrained XTTS-v2 on {'cuda' if use_gpu else 'cpu'}")
+
+    mode = f"speaker_wav={speaker_wav.name}" if speaker_wav else f"speaker={speaker}"
+    print(f"  [xtts] loaded pretrained XTTS-v2 on {'cuda' if use_gpu else 'cpu'} ({mode})")
 
     results: list[tuple[Path, str]] = []
     for index, text in enumerate(smoke_lines, start=1):
         wav_path = output_dir / f"sample-{index:02d}.wav"
-        tts.tts_to_file(
-            text=text,
-            language=language,
-            speaker_wav=str(speaker_wav),
-            file_path=str(wav_path),
-        )
+        tts_kwargs = {
+            "text": text,
+            "language": language,
+            "file_path": str(wav_path),
+        }
+        if speaker_wav:
+            tts_kwargs["speaker_wav"] = str(speaker_wav)
+        else:
+            tts_kwargs["speaker"] = speaker
+        tts.tts_to_file(**tts_kwargs)
         results.append((wav_path, text))
         print(f"  [xtts] sample-{index:02d}.wav ({len(text)} chars)")
 
-    # Free GPU memory before RVC inference
     del tts
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
@@ -230,9 +239,11 @@ def maybe_upload_review(
 def main() -> int:
     args = parse_args()
 
-    speaker_wav = Path(args.speaker_wav).expanduser().resolve()
-    if not speaker_wav.is_file():
-        raise SystemExit(f"Speaker WAV not found: {speaker_wav}")
+    speaker_wav = None
+    if args.speaker_wav:
+        speaker_wav = Path(args.speaker_wav).expanduser().resolve()
+        if not speaker_wav.is_file():
+            raise SystemExit(f"Speaker WAV not found: {speaker_wav}")
 
     smoke_lines = load_smoke_test_lines(Path(args.smoke_test_file))
 
@@ -246,7 +257,8 @@ def main() -> int:
     rvc_model_path, rvc_index_path = resolve_rvc_model(rvc_run_dir)
     print(f"[smoke] XTTS: pretrained coqui/XTTS-v2 (language={args.language})")
     print(f"[smoke] RVC:  {rvc_model_path.name}" + (f" + {rvc_index_path.name}" if rvc_index_path else ""))
-    print(f"[smoke] speaker ref: {speaker_wav.name}")
+    speaker_label = speaker_wav.name if speaker_wav else f"builtin:{args.speaker}"
+    print(f"[smoke] speaker: {speaker_label}")
     print(f"[smoke] {len(smoke_lines)} sentences")
 
     # --- Output directory lives under the RVC run ---
@@ -263,6 +275,7 @@ def main() -> int:
         print(f"\n[xtts] generating {len(smoke_lines)} samples with pretrained XTTS-v2...")
         xtts_samples = generate_pretrained_xtts_samples(
             speaker_wav=speaker_wav,
+            speaker=args.speaker,
             smoke_lines=smoke_lines,
             output_dir=xtts_dir,
             language=args.language,
@@ -312,7 +325,8 @@ def main() -> int:
             "rms_mix_rate": args.rms_mix_rate,
             "protect": args.protect,
         },
-        "speaker_wav": speaker_wav.name,
+        "speaker_wav": speaker_wav.name if speaker_wav else None,
+        "speaker_builtin": args.speaker if not speaker_wav else None,
         "generated_at": utc_now_iso(),
         "sample_count": len(smoke_lines),
         "status": "pending",
