@@ -6,6 +6,9 @@ set -euo pipefail
 
 export REPO_DIR="${REPO_DIR:-/workspace/aivoices}"
 export VENV_DIR="${VENV_DIR:-$REPO_DIR/.venv-train}"
+export PIP_INDEX_URL="${PIP_INDEX_URL:-https://pypi.org/simple}"
+export PIP_DEFAULT_TIMEOUT="${PIP_DEFAULT_TIMEOUT:-120}"
+export PIP_RETRIES="${PIP_RETRIES:-10}"
 
 cd "$REPO_DIR"
 

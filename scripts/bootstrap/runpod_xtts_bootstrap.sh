@@ -9,6 +9,9 @@ REQUIRED_PYTHON_VERSION="${REQUIRED_PYTHON_VERSION:-3.11.9}"
 BOOTSTRAP_ONLY="${BOOTSTRAP_ONLY:-1}"
 MICROMAMBA_ROOT_PREFIX="${MICROMAMBA_ROOT_PREFIX:-/workspace/micromamba}"
 PYTHON_ENV_NAME="${PYTHON_ENV_NAME:-xtts-py3119}"
+PIP_INDEX_URL="${PIP_INDEX_URL:-https://pypi.org/simple}"
+PIP_DEFAULT_TIMEOUT="${PIP_DEFAULT_TIMEOUT:-120}"
+PIP_RETRIES="${PIP_RETRIES:-10}"
 
 DATASET_REMOTE_PREFIX="${DATASET_REMOTE_PREFIX:-}"
 DATASET_NAMESPACE="${DATASET_NAMESPACE:-}"
@@ -182,6 +185,9 @@ run_training() {
 
 main() {
   need_cmd python3
+  export PIP_INDEX_URL
+  export PIP_DEFAULT_TIMEOUT
+  export PIP_RETRIES
   install_system_deps
   install_micromamba
   ensure_python_runtime
