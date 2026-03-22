@@ -174,65 +174,92 @@ def train_run(
     rvc_logs = applio_path / "logs" / voice
     rvc_logs.mkdir(parents=True, exist_ok=True)
 
+    num_cpu = str(__import__("multiprocessing").cpu_count())
+    exp_dir = str(rvc_logs)
+
     try:
         # Step 1: Preprocess
+        # positional: experiment_dir input_root sample_rate num_processes
+        #             cut_preprocess process_effects noise_reduction
+        #             reduction_strength chunk_len overlap_len normalization_mode
         print(f"[rvc] preprocessing {summary.wav_count} files at {sample_rate}Hz")
         subprocess.run(
             [
                 "python", str(applio_path / "rvc" / "train" / "preprocess" / "preprocess.py"),
-                "--model_name", voice,
-                "--dataset_path", str(wavs_dir),
-                "--sample_rate", str(sample_rate),
+                exp_dir,           # experiment_directory
+                str(wavs_dir),     # input_root
+                str(sample_rate),  # sample_rate
+                num_cpu,           # num_processes
+                "Cut",             # cut_preprocess
+                "false",           # process_effects
+                "false",           # noise_reduction
+                "0.7",             # reduction_strength
+                "0.5",             # chunk_len
+                "0.3",             # overlap_len
+                "Loudness",        # normalization_mode
             ],
             cwd=str(applio_path),
             check=True,
         )
 
-        # Step 2: Extract pitch (f0)
-        print(f"[rvc] extracting f0 with {f0_method}")
+        # Step 2: Extract features (f0 + embeddings in one script)
+        # positional: exp_dir f0_method num_processes gpus sample_rate
+        #             embedder_model [embedder_model_custom] [include_mutes]
+        print(f"[rvc] extracting f0 ({f0_method}) + ContentVec features")
         subprocess.run(
             [
-                "python", str(applio_path / "rvc" / "train" / "extract" / f"extract_f0_{f0_method}.py"),
-                "--model_name", voice,
+                "python", str(applio_path / "rvc" / "train" / "extract" / "extract.py"),
+                exp_dir,           # exp_dir
+                f0_method,         # f0_method
+                num_cpu,           # num_processes
+                "0",               # gpus (0 = first GPU)
+                str(sample_rate),  # sample_rate
+                "contentvec",      # embedder_model
+                "None",            # embedder_model_custom
+                "2",               # include_mutes
             ],
             cwd=str(applio_path),
             check=True,
         )
 
-        # Step 3: Extract ContentVec features
-        print("[rvc] extracting ContentVec features")
-        subprocess.run(
-            [
-                "python", str(applio_path / "rvc" / "train" / "extract" / "extract_feature_print.py"),
-                "--model_name", voice,
-            ],
-            cwd=str(applio_path),
-            check=True,
-        )
-
-        # Step 4: Train
+        # Step 3: Train
+        # positional: model_name save_every_epoch total_epoch pretrainG pretrainD
+        #             gpus batch_size sample_rate save_only_latest save_every_weights
+        #             cache_data_in_gpu overtraining_detector overtraining_threshold
+        #             cleanup vocoder checkpointing
         print(f"[rvc] training {total_epoch} epochs, batch_size={batch_size}")
         subprocess.run(
             [
                 "python", str(applio_path / "rvc" / "train" / "train.py"),
-                "--model_name", voice,
-                "--sample_rate", str(sample_rate),
-                "--total_epoch", str(total_epoch),
-                "--batch_size", str(batch_size),
-                "--save_every_epoch", str(save_every_epoch),
-                "--pretrained_G", str(pretrained["f0G48k.pth"]),
-                "--pretrained_D", str(pretrained["f0D48k.pth"]),
+                voice,                          # model_name
+                str(save_every_epoch),           # save_every_epoch
+                str(total_epoch),                # total_epoch
+                str(pretrained["f0G48k.pth"]),   # pretrainG
+                str(pretrained["f0D48k.pth"]),   # pretrainD
+                "0",                             # gpus
+                str(batch_size),                 # batch_size
+                str(sample_rate),                # sample_rate
+                "false",                         # save_only_latest
+                "true",                          # save_every_weights
+                "false",                         # cache_data_in_gpu
+                "false",                         # overtraining_detector
+                "50",                            # overtraining_threshold
+                "false",                         # cleanup
+                "Default",                       # vocoder
+                "true",                          # checkpointing
             ],
             cwd=str(applio_path),
             check=True,
         )
 
-        # Step 5: Generate FAISS index
+        # Step 4: Generate FAISS index
+        # positional: exp_dir index_algorithm
         print("[rvc] generating FAISS retrieval index")
         subprocess.run(
             [
                 "python", str(applio_path / "rvc" / "train" / "process" / "extract_index.py"),
-                "--model_name", voice,
+                exp_dir,    # exp_dir
+                "Auto",     # index_algorithm
             ],
             cwd=str(applio_path),
             check=True,
