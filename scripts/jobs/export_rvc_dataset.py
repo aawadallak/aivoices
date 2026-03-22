@@ -3,7 +3,7 @@
 
 Unlike XTTS exports, RVC only needs a directory of WAV files — no transcripts
 or metadata CSVs. This job collects curated clips from a provisional export,
-filters by speaker and duration, and copies them into an RVC-ready layout.
+filters by speaker and duration, validates audio, and optionally resamples.
 """
 
 from __future__ import annotations
@@ -46,6 +46,12 @@ def parse_args() -> argparse.Namespace:
         default=1.0,
         help="Minimum clip duration in seconds. Default: 1.0.",
     )
+    parser.add_argument(
+        "--resample-to",
+        type=int,
+        default=None,
+        help="Target sample rate in Hz (e.g. 48000). If omitted, keeps original SR.",
+    )
     return parser.parse_args()
 
 
@@ -77,6 +83,34 @@ def rvc_output_root(namespace: str, output_name: str) -> Path:
     return DATASETS_DIR / namespace / "exports" / "export_rvc" / output_name
 
 
+def _read_audio_info(path: Path) -> tuple[int, float] | None:
+    """Return (sample_rate, duration_sec) or None if file is unreadable."""
+    try:
+        import soundfile as sf
+        info = sf.info(path)
+        return info.samplerate, info.duration
+    except Exception:
+        return None
+
+
+def _copy_or_resample(source: Path, dest: Path, target_sr: int | None) -> int:
+    """Copy wav to dest, optionally resampling. Returns the output sample rate."""
+    if target_sr is None:
+        shutil.copy2(source, dest)
+        info = _read_audio_info(dest)
+        return info[0] if info else 0
+
+    import numpy as np
+    import soundfile as sf
+    import librosa
+
+    audio, source_sr = librosa.load(str(source), sr=None, mono=True)
+    if source_sr != target_sr:
+        audio = librosa.resample(audio, orig_sr=source_sr, target_sr=target_sr)
+    sf.write(str(dest), audio, target_sr, subtype="PCM_16")
+    return target_sr
+
+
 def write_dataset_info(
     path: Path,
     *,
@@ -85,6 +119,9 @@ def write_dataset_info(
     dataset_name: str,
     source_export: str,
     wav_count: int,
+    total_duration_sec: float,
+    sample_rates: set[int],
+    target_sample_rate: int | None,
 ) -> None:
     import json
     payload = {
@@ -94,6 +131,9 @@ def write_dataset_info(
         "source_export": source_export,
         "format": "rvc-v2",
         "wav_count": wav_count,
+        "total_duration_sec": round(total_duration_sec, 1),
+        "source_sample_rates": sorted(sample_rates),
+        "target_sample_rate": target_sample_rate,
         "created_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
     }
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -111,6 +151,9 @@ def main() -> int:
 
     counter = 0
     skipped_duration = 0
+    skipped_unreadable = 0
+    total_duration = 0.0
+    sample_rates: set[int] = set()
 
     with source_manifest.open(newline="", encoding="utf-8") as handle:
         for row in csv.DictReader(handle):
@@ -120,7 +163,6 @@ def main() -> int:
             episode_id = row["episode_id"]
             run_id = row["run_id"]
 
-            # Look up duration from matched-clips manifest
             matched_path = matched_manifest_path(args.namespace, run_id, episode_id)
             if not matched_path.is_file():
                 continue
@@ -144,12 +186,27 @@ def main() -> int:
             if not source_audio.is_file():
                 continue
 
+            # Validate audio is readable
+            audio_info = _read_audio_info(source_audio)
+            if audio_info is None:
+                skipped_unreadable += 1
+                print(f"[warn] skipping unreadable: {source_audio.name}")
+                continue
+            source_sr, _ = audio_info
+            sample_rates.add(source_sr)
+
             counter += 1
             target_name = f"{args.speaker}-{counter:04d}.wav"
-            shutil.copy2(source_audio, wavs_root / target_name)
+            _copy_or_resample(source_audio, wavs_root / target_name, args.resample_to)
+            total_duration += duration
 
     if counter == 0:
         raise SystemExit("No clips matched the RVC export filters.")
+
+    if len(sample_rates) > 1:
+        print(f"[warn] mixed source sample rates detected: {sorted(sample_rates)}")
+        if args.resample_to is None:
+            print("[warn] consider using --resample-to to normalize sample rates")
 
     write_dataset_info(
         output_root / "dataset-info.json",
@@ -158,10 +215,18 @@ def main() -> int:
         dataset_name=args.output_name,
         source_export=args.source_export,
         wav_count=counter,
+        total_duration_sec=total_duration,
+        sample_rates=sample_rates,
+        target_sample_rate=args.resample_to,
     )
 
+    effective_sr = args.resample_to or (next(iter(sample_rates)) if len(sample_rates) == 1 else "mixed")
     print(f"wrote RVC export to {output_root}")
-    print(f"speaker={args.speaker} wavs={counter} skipped_duration={skipped_duration}")
+    print(f"speaker={args.speaker} wavs={counter} duration={total_duration:.1f}s sr={effective_sr}")
+    if skipped_duration:
+        print(f"skipped (duration): {skipped_duration}")
+    if skipped_unreadable:
+        print(f"skipped (unreadable): {skipped_unreadable}")
     return 0
 
 

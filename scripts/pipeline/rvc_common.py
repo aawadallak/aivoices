@@ -22,6 +22,7 @@ class RvcDatasetSummary:
     voice: str
     wav_count: int
     total_duration_sec: float
+    sample_rates: tuple[int, ...]
 
 
 def utc_now_iso() -> str:
@@ -79,13 +80,18 @@ def validate_rvc_dataset(dataset_dir: Path) -> RvcDatasetSummary:
         raise SystemExit(f"No .wav files found in {wavs_dir}")
 
     total_duration = 0.0
+    detected_rates: set[int] = set()
     try:
         import soundfile as sf
         for wav_path in wav_files:
             info = sf.info(wav_path)
             total_duration += info.duration
+            detected_rates.add(info.samplerate)
     except ImportError:
-        pass  # soundfile not available — skip duration calculation
+        pass  # soundfile not available — skip duration/sr detection
+
+    if len(detected_rates) > 1:
+        print(f"[warn] mixed sample rates in dataset: {sorted(detected_rates)}")
 
     # Infer voice from first filename (pattern: <voice>-NNNN.wav)
     first_stem = wav_files[0].stem
@@ -98,4 +104,5 @@ def validate_rvc_dataset(dataset_dir: Path) -> RvcDatasetSummary:
         voice=voice,
         wav_count=len(wav_files),
         total_duration_sec=round(total_duration, 1),
+        sample_rates=tuple(sorted(detected_rates)),
     )
