@@ -177,15 +177,24 @@ def convert_samples_rvc(
 
 
 def resolve_rvc_model(rvc_run_dir: Path) -> tuple[Path, Path | None]:
-    """Find the RVC generator .pth and FAISS index in a run's model/ dir."""
+    """Find the RVC inference model .pth and FAISS index in a run's model/ dir.
+
+    Applio exports inference models as <voice>_<epoch>e_<step>s.pth (contains
+    'config' key). G_*.pth are trainer checkpoints and lack this key.
+    """
     mdir = rvc_model_dir(rvc_run_dir)
     if not mdir.is_dir():
         raise SystemExit(f"RVC model directory not found: {mdir}")
 
-    generators = sorted(mdir.glob("G_*.pth"))
-    if not generators:
-        raise SystemExit(f"No RVC generator checkpoint found in {mdir}")
-    model_path = generators[-1]
+    # Prefer exported inference models (<voice>_*e_*s.pth) over G_*.pth
+    inference_models = sorted(mdir.glob("*_*e_*s.pth"))
+    if inference_models:
+        model_path = inference_models[-1]  # latest epoch
+    else:
+        generators = sorted(mdir.glob("G_*.pth"))
+        if not generators:
+            raise SystemExit(f"No RVC model found in {mdir}")
+        model_path = generators[-1]
 
     index_files = list(mdir.glob("added_*.index"))
     index_path = index_files[0] if index_files else None
@@ -245,15 +254,20 @@ def main() -> int:
     xtts_dir = output_dir / "xtts"
     rvc_dir = output_dir / "rvc"
 
-    # Step 1: Generate XTTS samples with pretrained model
-    print(f"\n[xtts] generating {len(smoke_lines)} samples with pretrained XTTS-v2...")
-    xtts_samples = generate_pretrained_xtts_samples(
-        speaker_wav=speaker_wav,
-        smoke_lines=smoke_lines,
-        output_dir=xtts_dir,
-        language=args.language,
-        device=args.device,
-    )
+    # Step 1: Generate XTTS samples with pretrained model (cached if already present)
+    existing_xtts = sorted(xtts_dir.glob("sample-*.wav")) if xtts_dir.is_dir() else []
+    if len(existing_xtts) == len(smoke_lines):
+        print(f"\n[xtts] reusing {len(existing_xtts)} cached XTTS samples from {xtts_dir}")
+        xtts_samples = [(wav, text) for wav, text in zip(existing_xtts, smoke_lines)]
+    else:
+        print(f"\n[xtts] generating {len(smoke_lines)} samples with pretrained XTTS-v2...")
+        xtts_samples = generate_pretrained_xtts_samples(
+            speaker_wav=speaker_wav,
+            smoke_lines=smoke_lines,
+            output_dir=xtts_dir,
+            language=args.language,
+            device=args.device,
+        )
 
     # Step 2: Convert through RVC
     print(f"\n[rvc] converting {len(xtts_samples)} samples...")

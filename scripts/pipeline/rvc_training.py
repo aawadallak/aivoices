@@ -291,7 +291,12 @@ def train_run(
     out_model.mkdir(parents=True, exist_ok=True)
     out_logs.mkdir(parents=True, exist_ok=True)
 
-    # Copy best generator checkpoint
+    # Copy exported inference models (<voice>_<epoch>e_<step>s.pth)
+    inference_models = sorted(rvc_logs.glob(f"{voice}_*e_*s.pth"))
+    for m in inference_models:
+        shutil.copy2(m, out_model / m.name)
+
+    # Copy latest G_*.pth as fallback
     generator_candidates = sorted(rvc_logs.glob("G_*.pth"))
     if generator_candidates:
         best_g = generator_candidates[-1]
