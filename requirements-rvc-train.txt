@@ -1,0 +1,11 @@
+torch==2.8.0
+torchaudio==2.8.0
+numpy==1.26.4
+faiss-cpu==1.9.0.post1
+fairseq==0.12.2
+praat-parselmouth==0.4.5
+pyworld==0.3.4
+torchcrepe==0.0.23
+scipy==1.14.1
+soundfile
+librosa==0.10.2.post1
