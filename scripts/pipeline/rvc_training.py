@@ -27,7 +27,7 @@ PRETRAINED_ROOT = TRAINING_ROOT / "_shared" / "pretrained_v2"
 HUBERT_ROOT = TRAINING_ROOT / "_shared" / "hubert"
 RMVPE_ROOT = TRAINING_ROOT / "_shared" / "rmvpe"
 
-CONTENTVEC_URL = "https://huggingface.co/contentvec/contentvec/resolve/main/checkpoint_best_legacy_500.pt"
+CONTENTVEC_URL = "https://huggingface.co/lj1995/VoiceConversionWebUI/resolve/main/hubert_base.pt"
 RMVPE_URL = "https://huggingface.co/lj1995/VoiceConversionWebUI/resolve/main/rmvpe.pt"
 
 PRETRAINED_URLS = {
