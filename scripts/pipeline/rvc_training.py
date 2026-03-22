@@ -297,10 +297,12 @@ def train_run(
         best_g = generator_candidates[-1]
         shutil.copy2(best_g, out_model / best_g.name)
 
-    # Copy FAISS index
-    index_candidates = list(rvc_logs.glob(f"added_*.index"))
+    # Copy FAISS index (Applio names it either added_<voice>.index or <voice>.index)
+    index_candidates = list(rvc_logs.glob("added_*.index")) or list(rvc_logs.glob("*.index"))
     if index_candidates:
-        shutil.copy2(index_candidates[0], out_model / index_candidates[0].name)
+        idx = index_candidates[0]
+        dest_name = idx.name if idx.name.startswith("added_") else f"added_{idx.name}"
+        shutil.copy2(idx, out_model / dest_name)
 
     # Copy total_fea.npy if present
     total_fea = rvc_logs / "total_fea.npy"
