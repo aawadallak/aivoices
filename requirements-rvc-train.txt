@@ -8,3 +8,10 @@ torchcrepe==0.0.23
 scipy==1.14.1
 soundfile
 librosa==0.10.2.post1
+# Applio runtime deps not covered by its own requirements due to torch version conflict
+noisereduce
+pedalboard
+stftpitchshift
+ffmpeg-python
+wget
+torchfcpe

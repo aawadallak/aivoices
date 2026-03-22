@@ -154,10 +154,9 @@ prepare_venv() {
   source "$VENV_DIR/bin/activate"
   python -m pip install --upgrade pip setuptools wheel
   python -m pip install --no-cache-dir -r "$REPO_DIR/requirements-rvc-train.txt"
-  # Install Applio dependencies
-  if [[ -f "$APPLIO_DIR/requirements.txt" ]]; then
-    python -m pip install --no-cache-dir -r "$APPLIO_DIR/requirements.txt"
-  fi
+  # Applio's own requirements.txt pins torch==2.7.1+cu128 which conflicts
+  # with our torch==2.8.0. All needed Applio runtime deps are already
+  # included in requirements-rvc-train.txt, so we skip Applio's file.
 }
 
 fetch_dataset() {
