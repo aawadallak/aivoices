@@ -112,46 +112,27 @@ def generate_pretrained_xtts_samples(
 
     import torch
     import torchaudio
-    from TTS.tts.configs.xtts_config import XttsConfig
-    from TTS.tts.models.xtts import Xtts
-    from TTS.utils.manage import ModelManager
+    from TTS.api import TTS
 
-    # Download / locate the pretrained XTTS-v2 model
-    manager = ModelManager()
-    model_path, config_path, _ = manager.download_model(XTTS_HF_MODEL)
-    model_dir = Path(model_path).parent
-
-    config = XttsConfig()
-    config.load_json(str(config_path))
-    model = Xtts.init_from_config(config)
-    model.load_checkpoint(config, checkpoint_dir=str(model_dir), use_deepspeed=False)
-
-    if device == "cuda" and torch.cuda.is_available():
-        model.cuda()
-    else:
-        device = "cpu"
-
-    print(f"  [xtts] loaded pretrained XTTS-v2 on {device}")
-    gpt_cond_latent, speaker_embedding = model.get_conditioning_latents(
-        audio_path=[str(speaker_wav)]
-    )
+    # TTS API handles model download, config, vocab, and checkpoint loading
+    use_gpu = device == "cuda" and torch.cuda.is_available()
+    tts = TTS(XTTS_HF_MODEL, gpu=use_gpu)
+    print(f"  [xtts] loaded pretrained XTTS-v2 on {'cuda' if use_gpu else 'cpu'}")
 
     results: list[tuple[Path, str]] = []
     for index, text in enumerate(smoke_lines, start=1):
-        result = model.inference(
+        wav_path = output_dir / f"sample-{index:02d}.wav"
+        tts.tts_to_file(
             text=text,
             language=language,
-            gpt_cond_latent=gpt_cond_latent,
-            speaker_embedding=speaker_embedding,
+            speaker_wav=str(speaker_wav),
+            file_path=str(wav_path),
         )
-        wav_path = output_dir / f"sample-{index:02d}.wav"
-        audio = torch.tensor(result["wav"]).unsqueeze(0)
-        torchaudio.save(str(wav_path), audio, 24000)
         results.append((wav_path, text))
         print(f"  [xtts] sample-{index:02d}.wav ({len(text)} chars)")
 
     # Free GPU memory before RVC inference
-    del model, gpt_cond_latent, speaker_embedding
+    del tts
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
 
