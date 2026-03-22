@@ -203,6 +203,13 @@ def train_run(
     config.num_speakers = speaker_manager.num_speakers
 
     model = GPTTrainer.init_from_config(config)
+
+    # Ensure attributes exist that may be missing from older saved configs
+    # when resuming via --continue-path. Coqui's XTTSDataset expects this
+    # field but checkpoints saved before it was added lack it.
+    if not hasattr(config.model_args, "debug_loading_failures"):
+        config.model_args.debug_loading_failures = False
+
     trainer_args_kwargs = {
         "restore_path": restore_path,
         "skip_train_epoch": False,
