@@ -132,6 +132,13 @@ def _symlink_pretrained(applio_path: Path, pretrained: dict[str, Path]) -> None:
     if not rmvpe_target.exists():
         rmvpe_target.symlink_to(pretrained["rmvpe"])
 
+    # RMVPE predictor model — extract.py loads from rvc/models/predictors/rmvpe.pt
+    predictor_dir = applio_path / "rvc" / "models" / "predictors"
+    predictor_dir.mkdir(parents=True, exist_ok=True)
+    predictor_target = predictor_dir / "rmvpe.pt"
+    if not predictor_target.exists():
+        predictor_target.symlink_to(pretrained["rmvpe"])
+
     pv2_dir = applio_path / "assets" / "pretrained_v2"
     pv2_dir.mkdir(parents=True, exist_ok=True)
     for name in ("f0G48k.pth", "f0D48k.pth"):
