@@ -8,7 +8,13 @@ import csv
 import shutil
 import subprocess
 import sys
+import warnings
 from pathlib import Path
+
+warnings.filterwarnings("ignore", message=".*StreamingMediaDecoder has been deprecated.*")
+warnings.filterwarnings("ignore", message=".*StreamingMediaEncoder has been deprecated.*")
+warnings.filterwarnings("ignore", message=".*torchaudio.load_with_torchcodec.*")
+warnings.filterwarnings("ignore", message=".*torchaudio.save_with_torchcodec.*")
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 if str(ROOT_DIR) not in sys.path:
@@ -40,7 +46,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--smoke-test-file", default=str(DEFAULT_SMOKE_TEST_FILE))
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--include-milestone", action="store_true")
-    parser.add_argument("--remote-prefix", help="Optional remote run prefix, e.g. r2:aivoices/training/runs.")
+    parser.add_argument("--remote-prefix", default="r2:aivoices/training/runs", help="Remote run prefix. Default: r2:aivoices/training/runs.")
+    parser.add_argument("--no-upload", action="store_true", help="Skip uploading to remote.")
     parser.add_argument("--dry-run-upload", action="store_true")
     return parser.parse_args()
 
@@ -215,7 +222,7 @@ def main() -> int:
     write_json(candidates_manifest_path(run_dir), candidates_payload)
     print(f"wrote candidates manifest to {candidates_manifest_path(run_dir)}")
 
-    if args.remote_prefix:
+    if args.remote_prefix and not args.no_upload:
         maybe_upload_review(run_dir, args.remote_prefix, args.namespace, args.voice, args.run_id, args.dry_run_upload)
 
     return 0
