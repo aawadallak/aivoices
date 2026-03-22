@@ -202,13 +202,13 @@ def train_run(
     config.speaker_manager = speaker_manager
     config.num_speakers = speaker_manager.num_speakers
 
-    model = GPTTrainer.init_from_config(config)
+    # Monkey-patch XttsArgs so debug_loading_failures always exists, even
+    # when the trainer reloads config from a checkpoint that lacks the field.
+    from TTS.tts.layers.xtts.trainer.gpt_trainer import XttsArgs
+    if not hasattr(XttsArgs, "debug_loading_failures"):
+        XttsArgs.debug_loading_failures = False
 
-    # Ensure attributes exist that may be missing from older saved configs
-    # when resuming via --continue-path. Coqui's XTTSDataset expects this
-    # field but checkpoints saved before it was added lack it.
-    if not hasattr(config.model_args, "debug_loading_failures"):
-        config.model_args.debug_loading_failures = False
+    model = GPTTrainer.init_from_config(config)
 
     trainer_args_kwargs = {
         "restore_path": restore_path,
