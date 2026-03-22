@@ -190,7 +190,7 @@ def train_run(
                 str(wavs_dir),     # input_root
                 str(sample_rate),  # sample_rate
                 num_cpu,           # num_processes
-                "Cut",             # cut_preprocess
+                "Skip",            # cut_preprocess (Skip: clips already sliced)
                 "false",           # process_effects
                 "false",           # noise_reduction
                 "0.7",             # reduction_strength
