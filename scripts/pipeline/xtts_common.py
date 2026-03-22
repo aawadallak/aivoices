@@ -177,12 +177,17 @@ def checkpoint_sort_key(path: Path) -> tuple[int, float]:
 
 def list_checkpoint_files(training_dir: Path) -> list[Path]:
     candidates = list(training_dir.glob("checkpoint_*.pth"))
+    if not candidates:
+        candidates = list(training_dir.glob("*/checkpoint_*.pth"))
     return sorted(candidates, key=checkpoint_sort_key)
 
 
 def best_model_path(training_dir: Path) -> Path | None:
     path = training_dir / "best_model.pth"
-    return path if path.is_file() else None
+    if path.is_file():
+        return path
+    matches = list(training_dir.glob("*/best_model.pth"))
+    return matches[0] if matches else None
 
 
 def latest_checkpoint_path(training_dir: Path) -> Path | None:

@@ -164,7 +164,11 @@ def main() -> int:
     training_dir = run_dir / "trainer"
     config_path = training_dir / "config.json"
     if not config_path.is_file():
-        raise SystemExit(f"Trainer config not found: {config_path}")
+        nested = list(training_dir.glob("*/config.json"))
+        if nested:
+            config_path = nested[0]
+        else:
+            raise SystemExit(f"Trainer config not found: {config_path}")
     vocab_path = SHARED_MODEL_ROOT / "vocab.json"
     if not vocab_path.is_file():
         raise SystemExit(f"Shared vocab.json not found: {vocab_path}")
