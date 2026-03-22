@@ -153,8 +153,6 @@ prepare_venv() {
   # shellcheck disable=SC1090
   source "$VENV_DIR/bin/activate"
   python -m pip install --upgrade pip setuptools wheel
-  # omegaconf 2.0.6 has invalid metadata rejected by pip>=24.1; install it first with --no-deps
-  python -m pip install --no-cache-dir --no-deps omegaconf==2.0.6
   python -m pip install --no-cache-dir -r "$REPO_DIR/requirements-rvc-train.txt"
   # Install Applio dependencies
   if [[ -f "$APPLIO_DIR/requirements.txt" ]]; then
