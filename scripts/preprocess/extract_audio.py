@@ -48,8 +48,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--sample-rate",
         type=int,
-        default=16000,
-        help="Output sample rate in Hz. Default: 16000.",
+        default=22050,
+        help="Output sample rate in Hz. Default: 22050.",
     )
     parser.add_argument(
         "--channels",

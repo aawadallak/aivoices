@@ -129,7 +129,7 @@ def chunk_command(input_path: Path, start: int, duration: int, output_path: Path
         "-c:a",
         "pcm_s16le",
         "-ar",
-        "16000",
+        "22050",
         "-ac",
         "1",
         str(output_path),

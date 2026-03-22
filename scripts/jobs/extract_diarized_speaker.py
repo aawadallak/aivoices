@@ -70,7 +70,7 @@ def clip_command(audio_path: Path, start: float, end: float, output_path: Path) 
         "-c:a",
         "pcm_s16le",
         "-ar",
-        "16000",
+        "22050",
         "-ac",
         "1",
         str(output_path),

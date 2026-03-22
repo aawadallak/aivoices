@@ -5,6 +5,10 @@ from __future__ import annotations
 
 import argparse
 import sys
+import warnings
+
+warnings.filterwarnings("ignore", message=".*StreamingMediaDecoder has been deprecated.*")
+warnings.filterwarnings("ignore", message=".*torchaudio.load_with_torchcodec.*")
 from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parents[2]

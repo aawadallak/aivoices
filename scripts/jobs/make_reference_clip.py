@@ -26,7 +26,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--start", required=True, help="Start timestamp, for example 00:00:50.")
     parser.add_argument("--end", required=True, help="End timestamp, for example 00:01:04.")
     parser.add_argument("--label", required=True, help="Source label, for example batalha-dos-deuses-001.")
-    parser.add_argument("--sample-rate", type=int, default=16000, help="Output sample rate. Default: 16000.")
+    parser.add_argument("--sample-rate", type=int, default=22050, help="Output sample rate. Default: 22050.")
     parser.add_argument("--channels", type=int, default=1, help="Output channels. Default: 1.")
     parser.add_argument("--min-duration", type=float, default=6.0, help="Minimum approved duration in seconds.")
     parser.add_argument("--max-duration", type=float, default=20.0, help="Maximum approved duration in seconds.")

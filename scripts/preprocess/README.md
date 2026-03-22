@@ -20,7 +20,7 @@ python scripts/preprocess/extract_audio.py --series chaves --speaker seu-madruga
 Default output settings are tuned for speech workflows:
 
 - format: `wav`
-- sample rate: `16000`
+- sample rate: `22050`
 - channels: `1`
 
 Notes:

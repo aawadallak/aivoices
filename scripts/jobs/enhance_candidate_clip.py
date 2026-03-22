@@ -35,7 +35,7 @@ def ffmpeg_basic(input_path: Path, output_path: Path) -> list[str]:
         "-c:a",
         "pcm_s16le",
         "-ar",
-        "16000",
+        "22050",
         "-ac",
         "1",
         str(output_path),
