@@ -15,6 +15,9 @@ if [[ ! -d "$VENV_DIR" ]]; then
 fi
 
 source "$VENV_DIR/bin/activate"
+if [[ -f "$VENV_DIR/bin/xtts-runtime-env.sh" ]]; then
+  source "$VENV_DIR/bin/xtts-runtime-env.sh"
+fi
 
 python -m pip install --upgrade pip setuptools wheel
 python -m pip uninstall -y coqpit coqpit-config coqui-tts coqui-tts-trainer trainer TTS || true
@@ -32,9 +35,7 @@ for base in site.getsitepackages():
             elif path.exists():
                 path.unlink(missing_ok=True)
 PY
-python -m pip install --no-cache-dir --force-reinstall coqpit-config
 python -m pip install --no-cache-dir --force-reinstall -r "$REPO_DIR/requirements-xtts-train.txt"
-python -m pip install --no-cache-dir --force-reinstall coqui-tts coqui-tts-trainer
 
 python - <<'PY'
 mods = [

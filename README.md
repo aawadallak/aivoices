@@ -135,6 +135,8 @@ Relevant entrypoints:
 - `scripts/jobs/export_xtts_dataset.py`: XTTS-ready export with `metadata_train.csv`, `metadata_eval.csv`, and `wavs/`
 - `scripts/jobs/train_xtts.py`: XTTS training entrypoint using `--dataset-dir`
 
+For a fresh Runpod XTTS setup, start with [`docs/runpod.md`](/home/awadallak/aivoices/docs/runpod.md), which now includes a copy-paste "from zero" checklist for pod bootstrap, dataset fetch, dependency verification, and training start.
+
 ## Important Jobs
 
 Extract audio for a namespace:

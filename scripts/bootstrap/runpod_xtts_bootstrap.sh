@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_URL="${REPO_URL:-git@github.com:aawadallak/aivoices.git}"
+REPO_URL="${REPO_URL:-https://github.com/aawadallak/aivoices.git}"
 REPO_REF="${REPO_REF:-main}"
 REPO_DIR="${REPO_DIR:-/workspace/aivoices}"
 VENV_DIR="${VENV_DIR:-$REPO_DIR/.venv-train}"
@@ -22,6 +22,8 @@ RUN_EPOCHS="${RUN_EPOCHS:-10}"
 RUN_BATCH_SIZE="${RUN_BATCH_SIZE:-4}"
 RUN_GRAD_ACCUM="${RUN_GRAD_ACCUM:-8}"
 RUN_EXTRA_ARGS="${RUN_EXTRA_ARGS:-}"
+MANAGED_ENV_PREFIX="${MICROMAMBA_ROOT_PREFIX}/envs/${PYTHON_ENV_NAME}"
+MANAGED_ENV_LIB_DIR="${MANAGED_ENV_PREFIX}/lib"
 
 log() {
   printf '[bootstrap] %s\n' "$*"
@@ -92,14 +94,50 @@ sync_repo() {
   fi
 }
 
+configure_venv_runtime() {
+  local activate_path="$VENV_DIR/bin/activate"
+  local runtime_env_path="$VENV_DIR/bin/xtts-runtime-env.sh"
+  log "configuring runtime linker environment for $VENV_DIR"
+  cat > "$runtime_env_path" <<EOF
+#!/usr/bin/env bash
+export XTTS_MANAGED_ENV_PREFIX="${MANAGED_ENV_PREFIX}"
+export XTTS_MANAGED_ENV_LIB_DIR="${MANAGED_ENV_LIB_DIR}"
+if [[ -d "\$XTTS_MANAGED_ENV_LIB_DIR" ]]; then
+  case ":\${LD_LIBRARY_PATH:-}:" in
+    *":\$XTTS_MANAGED_ENV_LIB_DIR:"*) ;;
+    *) export LD_LIBRARY_PATH="\$XTTS_MANAGED_ENV_LIB_DIR\${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}" ;;
+  esac
+fi
+EOF
+  chmod 0755 "$runtime_env_path"
+  if ! grep -q "XTTS_MANAGED_ENV_LIB_DIR" "$activate_path"; then
+    cat >> "$activate_path" <<'EOF'
+
+# XTTS managed runtime libs from the micromamba Python baseline.
+export XTTS_MANAGED_ENV_PREFIX="__XTTS_MANAGED_ENV_PREFIX__"
+export XTTS_MANAGED_ENV_LIB_DIR="__XTTS_MANAGED_ENV_LIB_DIR__"
+if [[ -d "$XTTS_MANAGED_ENV_LIB_DIR" ]]; then
+  case ":${LD_LIBRARY_PATH:-}:" in
+    *":$XTTS_MANAGED_ENV_LIB_DIR:"*) ;;
+    *) export LD_LIBRARY_PATH="$XTTS_MANAGED_ENV_LIB_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" ;;
+  esac
+fi
+EOF
+    sed -i \
+      -e "s|__XTTS_MANAGED_ENV_PREFIX__|$MANAGED_ENV_PREFIX|g" \
+      -e "s|__XTTS_MANAGED_ENV_LIB_DIR__|$MANAGED_ENV_LIB_DIR|g" \
+      "$activate_path"
+  fi
+}
+
 prepare_venv() {
   log "preparing virtualenv at $VENV_DIR"
   "$TRAIN_PYTHON_BIN" -m venv "$VENV_DIR"
+  configure_venv_runtime
   # shellcheck disable=SC1090
   source "$VENV_DIR/bin/activate"
   python -m pip install --upgrade pip setuptools wheel
   python -m pip uninstall -y coqpit coqpit-config coqui-tts coqui-tts-trainer trainer TTS >/dev/null 2>&1 || true
-  python -m pip install --no-cache-dir --force-reinstall coqpit-config
   python -m pip install --no-cache-dir --force-reinstall -r "$REPO_DIR/requirements-xtts-train.txt"
 }
 

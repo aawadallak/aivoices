@@ -16,6 +16,8 @@ Container scaffold:
 - [`Dockerfile.xtts-train`](/home/awadallak/aivoices/Dockerfile.xtts-train)
 - [`requirements-xtts-train.txt`](/home/awadallak/aivoices/requirements-xtts-train.txt)
 
+The XTTS training requirements are pinned to a coherent stack for the current Runpod base image. In particular, keep `torch`, `torchaudio`, and Coqui packages pinned together; leaving them floating causes pip to backtrack into incompatible combinations and can try to upgrade the image away from its CUDA-matched baseline.
+
 The container is intended to run on a VM that already has NVIDIA runtime support.
 
 Current operational Python baseline for the first training runs:

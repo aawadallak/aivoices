@@ -16,10 +16,13 @@ if [[ ! -d "$VENV_DIR" ]]; then
 fi
 
 source "$VENV_DIR/bin/activate"
+if [[ -f "$VENV_DIR/bin/xtts-runtime-env.sh" ]]; then
+  source "$VENV_DIR/bin/xtts-runtime-env.sh"
+fi
 
 python -m pip install --upgrade pip setuptools wheel
 python -m pip install -U --no-cache-dir --force-reinstall "transformers==4.46.2"
-python -m pip install -U --no-cache-dir coqpit-config
+python -m pip install -U --no-cache-dir --force-reinstall "coqpit-config==0.1.2"
 
 python - <<'PY'
 mods = [

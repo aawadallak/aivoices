@@ -43,6 +43,9 @@ mkdir -p "$LOG_DIR"
 
 cd "$REPO_DIR"
 source "$REPO_DIR/.venv-train/bin/activate"
+if [[ -f "$REPO_DIR/.venv-train/bin/xtts-runtime-env.sh" ]]; then
+  source "$REPO_DIR/.venv-train/bin/xtts-runtime-env.sh"
+fi
 
 echo "$RUN_ID" | tee /workspace/last-run-id.txt
 nohup python3 "$REPO_DIR/scripts/jobs/train_xtts.py" \

@@ -1,7 +1,8 @@
-coqui-tts
-coqui-tts-trainer
-coqpit-config
+coqui-tts==0.25.3
+coqui-tts-trainer==0.2.2
+coqpit-config==0.1.2
 transformers==4.46.2
 soundfile
-torchaudio
-numpy
+torch==2.8.0
+torchaudio==2.8.0
+numpy==1.26.4
